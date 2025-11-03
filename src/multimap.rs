@@ -41,7 +41,6 @@ impl<K: Hash + Eq, V: Clone + Eq> ConcurrentMultiMap<K, V> {
             }
         }
         bucket.push_back((key, value));
-
     }
 
     // TODO:
@@ -68,4 +67,3 @@ impl<K: Hash + Eq, V: Clone + Eq> ConcurrentMultiMap<K, V> {
         values
     }
 }
-
