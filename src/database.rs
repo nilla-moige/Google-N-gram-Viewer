@@ -21,7 +21,10 @@ impl Database {
     // TODO:
     // Create a new empty archive. The map should have `BUCKETS` buckets.
     pub fn new() -> Self {
-        todo!()
+        Self {
+            reverse_index: ConcurrentMultiMap::new(BUCKETS),
+            blob_store: Mutex::new(Vec::new()),
+        }
     }
 
     // TODO:
@@ -33,17 +36,26 @@ impl Database {
     //    converting to lowercase or removing numerals.
     // 3. Add the document to the blob store
     pub fn publish(&self, doc: String) -> usize {
-        todo!()
+        let mut store = self.blob_store.lock().unwrap();
+        let id = store.len();
+        for word in doc.split_whitespace() {
+            self.reverse_index.set(word.to_string(), id);
+        }
+        store.push(doc);
+        id
     }
     // TODO:
     // Use the reverse index to get the set of documents that contain the given word.
     pub fn search(&self, word: &str) -> Vec<usize> {
-        todo!()
+        let results = self.reverse_index.get(word);
+        results
     }
     // TODO:
     // Retrieve the document with the given id from the blob store.
     // Return None if the given id is invalid.
     pub fn retrieve(&self, id: usize) -> Option<String> {
-        todo!()
+        let store = self.blob_store.lock().unwrap();
+        store.get(id).cloned()
+        
     }
 }
