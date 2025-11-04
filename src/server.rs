@@ -88,7 +88,6 @@ impl Server {
     // loop and return.
     fn listen(&self, port: u16) {
         let listener = TcpListener::bind(("127.0.0.1", port)).unwrap();
-        println!("Server listening on port {}", port);
 
         for stream in listener.incoming() {
             if self.state.is_stopped.load(Ordering::SeqCst) {
@@ -112,22 +111,14 @@ impl Server {
     pub fn run(&self, port: u16) {
         // Set up a signal handler to stop the server when Ctrl-C is pressed
         let state = Arc::clone(&self.state);
-        match ctrlc::try_set_handler(move || {
-            println!("Stopping server...");
+        let _ = ctrlc::try_set_handler(move || {
             state.is_stopped.store(true, Ordering::SeqCst);
-        }) {
-            Ok(_) => {}
-            Err(ctrlc::Error::MultipleHandlers) => {}
-            Err(e) => {
-                panic!("Error setting Ctrl-C handler: {}", e);
-            }
-        }
+        });
+        
 
         // TODO: Call the listen function and then loop (doing nothing) until the server has been stopped
         self.listen(port);
-        while !self.state.is_stopped.load(Ordering::SeqCst) {
-            thread::sleep(std::time::Duration::from_millis(100));
-        }
+       
     }
     pub fn stop(&self) {
         self.state.is_stopped.store(true, Ordering::SeqCst);
