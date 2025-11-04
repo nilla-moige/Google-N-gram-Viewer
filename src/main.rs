@@ -51,17 +51,17 @@ fn main() {
             let client = Client::new(&server_address, server_port);
             match action {
                 ClientCommands::Publish { document } => {
-                    let response = client.publish_from_path(&document);
-                    println!("{:?}", response);
+                    let _response = client.publish_from_path(&document);
+                    
                     
                 }
                 ClientCommands::Search { word } => {
-                    let response = client.search(&word);
-                    println!("{:?}", response);
+                    let _response = client.search(&word);
+                    
                 }
                 ClientCommands::Retrieve { id } => {
-                    let response = client.retrieve(id);
-                    println!("{:?}", response);
+                    let _response = client.retrieve(id);
+                    
                 }
             }
         }
