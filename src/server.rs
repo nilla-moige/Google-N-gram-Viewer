@@ -118,6 +118,9 @@ impl Server {
 
         // TODO: Call the listen function and then loop (doing nothing) until the server has been stopped
         self.listen(port);
+        while !self.state.is_stopped.load(Ordering::SeqCst) {
+            thread::sleep(std::time::Duration::from_millis(100));
+        }
        
     }
     pub fn stop(&self) {
