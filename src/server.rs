@@ -20,7 +20,24 @@ const WORKERS: usize = 16;
 // and then creating the appropriate response and turning it into bytes which are sent to along
 // the stream by calling the `write_all` method.
 fn process_message(state: Arc<ServerState>, request: Request, mut stream: TcpStream) {
-    todo!()
+    let response = match request {
+        Request::Publish { doc } => {
+            let id = state.database.publish(doc);
+            Response::PublishSuccess(id)
+        }
+        Request::Search { word } => {
+            let ids = state.database.search(&word);
+            Response::SearchSuccess(ids)
+        }
+        Request::Retrieve { id } => {
+            if let Some(doc) = state.database.retrieve(id) {
+                Response::RetrieveSuccess(doc)
+            } else {
+                Response::Failure
+            }
+        }
+    };
+    let _ = stream.write_all(&response.to_bytes());
 }
 
 /// A struct that contains the state of the server
@@ -74,7 +91,6 @@ impl Server {
         println!("Server listening on port {}", port);
 
         for stream in listener.incoming() {
-
             if self.state.is_stopped.load(Ordering::SeqCst) {
                 break;
             }
