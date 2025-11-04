@@ -3,6 +3,7 @@ use crate::message::*;
 use crate::pool::ThreadPool;
 use std::io::Write;
 use std::net::{TcpListener, TcpStream};
+use std::os::macos::raw::stat;
 use std::sync::{
     atomic::{AtomicBool, Ordering},
     Arc,
@@ -48,7 +49,9 @@ impl Server {
     // TODO:
     // Create a new server by using the `ServerState::new` function
     pub fn new() -> Self {
-        todo!()
+        Self {
+            state: Arc::new(ServerState::new()),
+        }
     }
 
     // TODO:
@@ -67,7 +70,26 @@ impl Server {
     // `ServerState` to see if the server has been stopped. If it has, you should break out of the
     // loop and return.
     fn listen(&self, port: u16) {
-        todo!()
+        let listener = TcpListener::bind(("127.0.0.1", port)).unwrap();
+        println!("Server listening on port {}", port);
+
+        for stream in listener.incoming() {
+
+            if self.state.is_stopped.load(Ordering::SeqCst) {
+                break;
+            }
+
+            let stream = stream.unwrap();
+            let state = Arc::clone(&self.state);
+            self.state.pool.execute(move || {
+                let mut stream = stream;
+                if let Some(request) = Request::from_bytes(&mut stream) {
+                    process_message(state, request, stream);
+                } else {
+                    let _ = stream.write_all(&Response::Failure.to_bytes());
+                }
+            });
+        }
     }
 
     // This function has already been partially completed for you
@@ -86,7 +108,10 @@ impl Server {
         }
 
         // TODO: Call the listen function and then loop (doing nothing) until the server has been stopped
-        todo!()
+        self.listen(port);
+        while !self.state.is_stopped.load(Ordering::SeqCst) {
+            thread::sleep(std::time::Duration::from_millis(100));
+        }
     }
     pub fn stop(&self) {
         self.state.is_stopped.store(true, Ordering::SeqCst);
