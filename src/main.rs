@@ -52,13 +52,16 @@ fn main() {
             match action {
                 ClientCommands::Publish { document } => {
                     let response = client.publish_from_path(&document);
+                    println!("{:?}", response);
                     
                 }
                 ClientCommands::Search { word } => {
                     let response = client.search(&word);
+                    println!("{:?}", response);
                 }
                 ClientCommands::Retrieve { id } => {
                     let response = client.retrieve(id);
+                    println!("{:?}", response);
                 }
             }
         }
