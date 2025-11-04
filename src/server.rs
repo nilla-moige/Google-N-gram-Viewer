@@ -3,7 +3,7 @@ use crate::message::*;
 use crate::pool::ThreadPool;
 use std::io::Write;
 use std::net::{TcpListener, TcpStream};
-use std::os::macos::raw::stat;
+//use std::os::macos::raw::stat;
 use std::sync::{
     atomic::{AtomicBool, Ordering},
     Arc,
